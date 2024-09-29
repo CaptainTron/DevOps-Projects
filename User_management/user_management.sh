@@ -43,13 +43,27 @@ create_group() {
     echo "Group $groupname created successfully!"
 }
 
-backup_directory() {
+backup_directory_to_github() {
     read -p "Enter directory to backup: " dir
-    read -p "Enter backup destination (e.g., /backup/): " backup_dest
+
+    # this should contain path where repo is currently located
+    repo_dir = "/path/to/your/local/repository"
+    backup_name = $(basename $dir)_$(date +%F).tar.gz
+    
     if [ -d "$dir" ]; then
-        backup_name=$(basename $dir)_$(date +%F).tar.gz
-        tar -czvf $backup_dest/$backup_name $dir
-        echo "Backup completed: $backup_dest/$backup_name"
+
+        # Compress the repo_dir/backup_name
+        tar -czvf $repo_dir/$backup_name $dir
+        echo "Backup created: $repo_dir/$backup_name"
+        
+        # Navigate to the repo where to push repo from
+        cd $repo_dir    
+        
+        git add $backup_name
+        git commit -m "Backup of $dir on $(date)"
+        git push origin main
+        
+        echo "Backup pushed to GitHub successfully!"
     else
         echo "Directory $dir does not exist."
     fi
